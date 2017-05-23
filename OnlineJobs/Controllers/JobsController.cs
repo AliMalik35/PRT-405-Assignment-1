@@ -7,18 +7,62 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using OnlineJobs;
+using Microsoft.AspNet.Identity;
 
 namespace OnlineJobs.Controllers
 {
     public class JobsController : Controller
     {
         private JobDBEntities2 db = new JobDBEntities2();
+        public Boolean CheckCurrentUser()
+        {
+            var CurrentUserName = User.Identity.GetUserName();
+            var CurrentUserID = User.Identity.GetUserId();
+            if (CurrentUserID != null && CurrentUserName != "")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public Boolean CheckAdmin()
+        {
+            if (User.Identity.GetUserName() == "alimalik@gmail.com")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         // GET: Jobs
+        [Authorize]
         public ActionResult Index()
         {
-            var jobs = db.Jobs.Include(j => j.AspNetUser);
-            return View(jobs.ToList());
+            if (CheckCurrentUser() == true)
+            {
+                if (CheckAdmin() == true)
+                {
+                    var jobs = db.Jobs.Include(j => j.AspNetUser);
+                    return View(jobs);
+                }
+                else
+                {
+                    var loginUser = User.Identity.GetUserId();
+                    var job2 = db.Jobs.Where(j => j.User_ID ==loginUser);
+                    return View(job2.ToList());
+                }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
         }
 
         // GET: Jobs/Details/5
