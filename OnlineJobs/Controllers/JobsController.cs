@@ -92,8 +92,9 @@ namespace OnlineJobs.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Job_Title,Description,Company,Start_Level,Salary,Post_Date,Last_Date,User_ID")] Job job)
+        public ActionResult Create([Bind(Include = "Id,Job_Title,Description,Company,Start_Level,Salary,Post_Date,Last_Date")] Job job)
         {
+            job.User_ID = User.Identity.GetUserId();
             if (ModelState.IsValid)
             {
                 db.Jobs.Add(job);
